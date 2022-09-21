@@ -49,7 +49,7 @@ async def d6(ctx):
 async def on_message(message):
     if message.content == "Salut tout le monde":
         channel = message.channel
-        await channel.send("Salut tout seul " + message.author.mention)
+        await channel.send("Salut tout seul " + message.author.mention + " 😔")
     await bot.process_commands(message)
 
 # ------- ADMIN ------ #
@@ -67,7 +67,7 @@ async def admin(ctx, member: discord.Member):
 
 
 @bot.command()
-async def ban(member: discord.Member):
+async def ban(ctx, member: discord.Member):
     await member.ban()
 
 
@@ -80,16 +80,28 @@ async def count(ctx):
             members[member.status.value] += 1
     await ctx.send(sentence.format(members["online"], members["dnd"], members["idle"], members["offline"]))
 
+@bot.command()
+async def count_sorted(ctx):
+    members_sorted_by_status = {"online": [], "dnd": [], "idle": [], "offline": []}
+    for member in ctx.guild.members:
+        if not member.bot:
+            members_sorted_by_status[member.status.value].append(member.name)
+    if members_sorted_by_status["online"]:
+        await ctx.send(str(members_sorted_by_status["online"]) + " are online")
+    if members_sorted_by_status["dnd"]:
+        await ctx.send(str(members_sorted_by_status["dnd"]) + " dont want to be disturbed")
+    if members_sorted_by_status["idle"]:
+        await ctx.send(str(members_sorted_by_status["idle"]) + " are idle ")
+    if members_sorted_by_status["offline"]:
+        await ctx.send(str(members_sorted_by_status["offline"]) + " are offline")
+
+
 
 # ------- GAMES ------ #
 @bot.command()
 async def xkcd(ctx):
-    url = 'https://imgs.xkcd.com/comics/online_package_tracking.png'
-    async with aiohttp.ClientSession() as session:  # creates session
-        async with session.get(url) as resp:  # gets image from url
-            img = await resp.read()  # reads image from response
-            with io.BytesIO(img) as file:  # converts to file-like object
-                await ctx.send(file=discord.File(file, "testimage.png"))
+    url = 'https://xkcd.com/{}/'.format(random.randint(1, 1000))
+    await ctx.send(url)
 
 
 @bot.command()
